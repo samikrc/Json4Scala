@@ -1,9 +1,10 @@
 ## Json4Scala
-Json4Scala is a one-file-only JSON library for Scala.
-The file "json.scala" has no more than 300 lines.
+[Original] Json4Scala is a one-file-only JSON library for Scala. The file "json.scala" has no more than 300 lines.
 The implementation of Json Objects is very easy, benefits from the "Any" class of Scala. Array was implemented by "Array[Value]", and Object was implemented by Map[String, Value].
 I was trying to implement the code as short as possible, so you can understand the detail of the code easily.
-For more detail, see "json.scala".
+For more detail, see "Json.scala".
+
+[samikrc] Added Exception for some of the reported errors for easier integration. Fixed a [bug][2].
 
 
 
@@ -81,3 +82,4 @@ With [spray-json][1], the process cost time:
 
 
   [1]: https://github.com/spray/spray-json
+  [2]: https://github.com/momodi/Json4Scala/issues/1
