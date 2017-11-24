@@ -105,9 +105,13 @@ object Json
                     {
                         each =>
                         {
-                            if (each == '\\' || each == '"')
+                            if (each == '\\')
                             {
                                 buffer.append('\\')
+                            }
+                            else if (each == '"')
+                            {
+                                buffer.append("\\\"")
                             }
                             else if (each == '\b')
                             {
