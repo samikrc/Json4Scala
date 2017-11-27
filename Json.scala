@@ -58,6 +58,8 @@ object Json
 
         def isMap = value.isInstanceOf[Map[_, _]]
 
+        def isNumeric = isInt || isDouble
+
         def apply(i: Int): Value = value.asInstanceOf[Array[Value]](i)
 
         def apply(key: String): Value = value.asInstanceOf[Map[String, Value]](key)
