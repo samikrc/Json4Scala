@@ -32,6 +32,7 @@ object Json
       */
     class Value(input_value: Any)
     {
+
         def asInt: Int = value match
         {
             case v: Long if v.toInt == v => v.toInt
@@ -120,13 +121,9 @@ object Json
                     {
                         each =>
                         {
-                            if (each == '\\')
+                            if (each == '\\' || each == '"')
                             {
                                 buffer.append('\\')
-                            }
-                            else if(each == '"')
-                            {
-                                buffer.append("\\\"")
                             }
                             else if (each == '\b')
                             {

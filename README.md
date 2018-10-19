@@ -79,6 +79,22 @@ With [spray-json][1], the process cost time:
 
     58.44s user 3.43s system 114% cpu 53.826 total
     
+### Writing JSON
+[samikrc] It is also very easy to spit out valid nested JSON from maps and other objects using this library. Example follows.
+   
+    scala> :paste ./Json.scala
+    Pasting file ./Json.scala...
+    import scala.collection.mutable
+    defined object Json
+
+    scala> val a = Map("a"->"x", "b"->"y", "c"->Map("a"->"x", "b"->"y"), "d"->Array("a","b"))
+    a: scala.collection.immutable.Map[String,Object] = Map(a -> x, b -> y, c -> Map(a -> x, b -> y), d -> Array(a, b))
+
+    scala> val b = Json.Value(a)
+    b: Json.Value = Json$Value@4b87760e
+
+    scala> b.write()
+    res0: String = {"a":"x","b":"y","c":{"a":"x","b":"y"},"d":["a","b"]}
 
 
   [1]: https://github.com/spray/spray-json
