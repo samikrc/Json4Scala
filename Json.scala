@@ -1,7 +1,7 @@
 /**
   * Created by gaoyunxiang on 8/22/15.
   * Modified by samikrc
- */
+  */
 
 import scala.collection.mutable
 
@@ -10,25 +10,28 @@ object Json
 
     /**
       * Incomplete JSON
-      * @param length
+      * @param message
       */
-    case class IncompleteJSONException(val length: Int) extends Exception(s"Parse error: the JSON string might be incomplete!!")
+    case class IncompleteJSONException(val message: String) extends Exception(s"Parse error: the JSON string might be incomplete - $message")
 
     /**
       * Unrecognized characters
       * @param char
       * @param pos
       */
-    case class UnrecognizedCharException(val char: String, val pos: Int) extends Exception(s"Parse error: unrecognized character '$char' at $pos")
+    case class UnrecognizedCharException(val char: String, val pos: Int) extends Exception(s"Parse error: unrecognized character(s) '${char.substring(0, 6)}'... at position $pos - might be incomplete. Check for matching braces.")
 
     object Type extends Enumeration
     {
         val NULL, INT, DOUBLE, BOOLEAN, STRING, ARRAY, OBJECT = Value
     }
 
+    /**
+      * Encapsulates a JSON structure from any of the supported data type.
+      * @param input_value
+      */
     class Value(input_value: Any)
     {
-
         def asInt: Int = value match
         {
             case v: Long if v.toInt == v => v.toInt
@@ -58,16 +61,28 @@ object Json
 
         def isMap = value.isInstanceOf[Map[_, _]]
 
+        def isNumeric = isInt || isDouble
+
         def apply(i: Int): Value = value.asInstanceOf[Array[Value]](i)
 
         def apply(key: String): Value = value.asInstanceOf[Map[String, Value]](key)
 
-        def write(): String =
+        /**
+          * Method to write this object as JSON string.
+          * @return
+          */
+        def write: String =
         {
             val buffer = new mutable.StringBuilder()
             rec_write(buffer)
             buffer.toString()
         }
+
+        /**
+          * Method to write this object as JSON string, ending with newline.
+          * @return
+          */
+        def writeln: String = s"${write}\n"
 
         private val value: Any = input_value match
         {
@@ -88,7 +103,7 @@ object Json
             case v: Array[_] => v.map(Value(_))
             case v: Iterator[_] => v.map(Value(_)).toArray
 
-            case _ => throw new Exception("unknow type")
+            case _ => throw new Exception("Unknown type")
         }
 
         private def rec_write(buffer: mutable.StringBuilder): Unit =
@@ -105,9 +120,13 @@ object Json
                     {
                         each =>
                         {
-                            if (each == '\\' || each == '"')
+                            if (each == '\\')
                             {
                                 buffer.append('\\')
+                            }
+                            else if(each == '"')
+                            {
+                                buffer.append("\\\"")
                             }
                             else if (each == '\b')
                             {
@@ -165,8 +184,18 @@ object Json
                             one._2.asInstanceOf[Value].rec_write(buffer)
                     }
                     buffer.append('}')
-                case _ => throw new Exception("unknow data type")
+                case _ => throw new Exception("Unknown data type")
             }
+        }
+
+        override def toString: String =
+        {
+            // Only convert to string if this is a single value
+            if(this.isInt) this.asInt.toString
+            else if(this.isDouble) this.asDouble.toString
+            else if(this.isString) this.asString
+            else if(this.isArray || this.isMap) super.toString
+            else this.asLong.toString
         }
     }
 
@@ -205,7 +234,7 @@ object Json
                 }
                 if (sta.isEmpty || sta.last._1 != '[')
                 {
-                    throw new Exception("parse error, [] not match")
+                    throw new IncompleteJSONException("[] not match")
                 }
                 sta.trimEnd(1)
                 sta.append(('a', vec.iterator))
@@ -224,7 +253,7 @@ object Json
                 }
                 if (sta.isEmpty || sta.last._1 != '{')
                 {
-                    throw new Exception("parse error, {} not match")
+                    throw new IncompleteJSONException("{} not match")
                 }
                 sta.trimEnd(1)
                 sta.append(('o', now.toMap))
@@ -331,7 +360,7 @@ object Json
         }
         if (sta.length != 1)
         {
-            throw new IncompleteJSONException(sta.length)
+            throw new IncompleteJSONException("Unknown parsing error")
         }
         Value(sta.head._2)
     }

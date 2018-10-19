@@ -9,7 +9,7 @@ object TestJsonParser extends App
     assert(Json.parse("false").asBoolean == false)
     assert(Json.parse("123.123").asDouble == 123.123)
     assert(Json.parse("\"aaa\"").asString == "aaa")
-    assert(Json.parse("\"aaa\"").write() == "\"aaa\"")
+    assert(Json.parse("\"aaa\"").write == "\"aaa\"")
 
     var json = Json.Value(Map("a" -> Array(1,2,3), "b" -> Array(4, 5, 6)))
     assert(json("a")(0).asInt == 1)
@@ -17,7 +17,7 @@ object TestJsonParser extends App
 
     // Following should throw NumberFormatException
     // However, no way to check for expected Exception using builtin assert.
-    //assert(Json.parse("12..223").asDouble == 12.223)
+    assert(Json.parse("12..223").asDouble == 12.223)
 
     // parse base
     var str =
@@ -30,8 +30,8 @@ object TestJsonParser extends App
     assert(json.asMap("string").asString == "asdf")
     assert(json.asMap("bool_true").asBoolean == true)
     assert(json.asMap("bool_false").asBoolean == false)
-    println(json.write())
-    assert(json.write().length > 0)
+    println(json.write)
+    assert(json.write.length > 0)
 
     // parse object
     str =
@@ -57,7 +57,7 @@ object TestJsonParser extends App
     // parse real
     str = "{\"styles\":[214776380871671808,214783111085424640,214851869216866304,214829406537908224],\"group\":100,\"name\":\"AO4614【金宏达电子】现货库存 质量保证 欢迎购买@\",\"shopgrade\":8,\"price\":0.59,\"shop_id\":60095469,\"C3\":50018869,\"C2\":50024099,\"C1\":50008090,\"imguri\":\"http://img.geilicdn.com/taobao10000177139_425x360.jpg\",\"cag\":50006523,\"soldout\":0,\"C4\":50006523}"
     json = Json.parse(str)
-    println(json.write())
+    println(json.write)
     assert(json.asMap.size > 0)
 
 }
