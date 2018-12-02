@@ -1,4 +1,5 @@
 /**
+  * Single class JSON parser
   * Created by gaoyunxiang on 8/22/15.
   * Modified by samikrc
   */
@@ -28,9 +29,9 @@ object Json
 
     /**
       * Encapsulates a JSON structure from any of the supported data type.
-      * @param input_value
+      * @param inputValue
       */
-    class Value(input_value: Any)
+    class Value(inputValue: Any)
     {
 
         def asInt: Int = value match
@@ -75,7 +76,7 @@ object Json
         def write: String =
         {
             val buffer = new mutable.StringBuilder()
-            rec_write(buffer)
+            recWrite(buffer)
             buffer.toString()
         }
 
@@ -85,14 +86,14 @@ object Json
           */
         def writeln: String = s"${write}\n"
 
-        private val value: Any = input_value match
+        private val value: Any = inputValue match
         {
             case null => null
             case v: Int => v.toLong
-            case v: Long => input_value
-            case v: Double => input_value
-            case v: Boolean => input_value
-            case v: String => input_value
+            case v: Long => inputValue
+            case v: Double => inputValue
+            case v: Boolean => inputValue
+            case v: String => inputValue
             case v: Value => v.value
             case v: Map[_, _] =>
                 v.map
@@ -107,7 +108,7 @@ object Json
             case _ => throw new Exception("Unknown type")
         }
 
-        private def rec_write(buffer: mutable.StringBuilder): Unit =
+        private def recWrite(buffer: mutable.StringBuilder): Unit =
         {
             value match
             {
@@ -160,7 +161,7 @@ object Json
                         {
                             buffer.append(',')
                         }
-                        v(i).asInstanceOf[Value].rec_write(buffer)
+                        v(i).asInstanceOf[Value].recWrite(buffer)
                     }
                     buffer.append(']')
                 case v: Map[_, _] =>
@@ -178,7 +179,7 @@ object Json
                             buffer.append(one._1)
                             buffer.append('"')
                             buffer.append(':')
-                            one._2.asInstanceOf[Value].rec_write(buffer)
+                            one._2.asInstanceOf[Value].recWrite(buffer)
                     }
                     buffer.append('}')
                 case _ => throw new Exception("Unknown data type")
@@ -231,7 +232,7 @@ object Json
                 }
                 if (sta.isEmpty || sta.last._1 != '[')
                 {
-                    throw new IncompleteJSONException("[] not match")
+                    throw new IncompleteJSONException("[] does not match")
                 }
                 sta.trimEnd(1)
                 sta.append(('a', vec.iterator))
@@ -250,7 +251,7 @@ object Json
                 }
                 if (sta.isEmpty || sta.last._1 != '{')
                 {
-                    throw new IncompleteJSONException("{} not match")
+                    throw new IncompleteJSONException("{} does not match")
                 }
                 sta.trimEnd(1)
                 sta.append(('o', now.toMap))
