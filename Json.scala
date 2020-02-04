@@ -1,7 +1,7 @@
 /**
   * Single class JSON parser
   * Created by gaoyunxiang on 8/22/15.
-  * Modified by samikrc
+  * Modified by samikrc  
   */
 
 import scala.collection.mutable
@@ -94,6 +94,9 @@ object Json
             case v: Double => inputValue
             case v: Boolean => inputValue
             case v: String => inputValue
+            // Adding Float: up-converting to double
+            case v: Float => v.toDouble
+            // Adding Byte: for the time bing, just converting into String
             case v: Value => v.value
             case v: Map[_, _] =>
                 v.map
