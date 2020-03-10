@@ -1,8 +1,9 @@
 /**
-  * Single class JSON parser
-  * Created by gaoyunxiang on 8/22/15.
-  * Modified by samikrc  
-  */
+ * Single class JSON parser
+ * Created by gaoyunxiang on 8/22/15.
+ * Modified by samikrc
+ * Updated 10-03-2020
+ */
 
 import scala.collection.mutable
 
@@ -10,16 +11,16 @@ object Json
 {
 
     /**
-      * Incomplete JSON
-      * @param message
-      */
+     * Incomplete JSON
+     * @param message
+     */
     case class IncompleteJSONException(val message: String) extends Exception(s"Parse error: the JSON string might be incomplete - $message")
 
     /**
-      * Unrecognized characters
-      * @param char
-      * @param pos
-      */
+     * Unrecognized characters
+     * @param char
+     * @param pos
+     */
     case class UnrecognizedCharException(val char: String, val pos: Int) extends Exception(s"Parse error: unrecognized character(s) '${char.substring(0, 6)}'... at position $pos - might be incomplete. Check for matching braces.")
 
     object Type extends Enumeration
@@ -28,9 +29,9 @@ object Json
     }
 
     /**
-      * Encapsulates a JSON structure from any of the supported data type.
-      * @param inputValue
-      */
+     * Encapsulates a JSON structure from any of the supported data type.
+     * @param inputValue
+     */
     class Value(inputValue: Any)
     {
 
@@ -70,9 +71,9 @@ object Json
         def apply(key: String): Value = value.asInstanceOf[Map[String, Value]](key)
 
         /**
-          * Method to write this object as JSON string.
-          * @return
-          */
+         * Method to write this object as JSON string.
+         * @return
+         */
         def write: String =
         {
             val buffer = new mutable.StringBuilder()
@@ -81,28 +82,25 @@ object Json
         }
 
         /**
-          * Method to write this object as JSON string, ending with newline.
-          * @return
-          */
+         * Method to write this object as JSON string, ending with newline.
+         * @return
+         */
         def writeln: String = s"${write}\n"
 
         private val value: Any = inputValue match
         {
             case null => null
             case v: Int => v.toLong
-            case v: Long => inputValue
-            case v: Double => inputValue
-            case v: Boolean => inputValue
-            case v: String => inputValue
+            case _: Long => inputValue
+            case _: Double => inputValue
+            case _: Boolean => inputValue
+            case _: String => inputValue
             // Adding Float: up-converting to double
             case v: Float => v.toDouble
-            // Adding Byte: for the time bing, just converting into String
             case v: Value => v.value
-            case v: Map[_, _] =>
-                v.map
-                { case one =>
-                    (one._1.toString, Value(one._2))
-                }
+            case v: Map[_, _] => v.map{ case (k, v) => (k.toString, Value(v)) }
+            // Adding mutable map classes
+            case v: mutable.Map[_, _] => v.map{ case (k, v) => (k.toString, Value(v)) }
             case v: Vector[_] => v.map(Value(_)).toArray
             case v: List[_] => v.map(Value(_)).toArray
             case v: Array[_] => v.map(Value(_))
