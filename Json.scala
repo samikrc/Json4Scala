@@ -5,6 +5,7 @@
  * Updated 10-03-2020
  */
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 object Json
@@ -97,6 +98,7 @@ object Json
             case _: String => inputValue
             // Adding Float: up-converting to double
             case v: Float => v.toDouble
+            // Adding Byte: for the time being, just converting into String. Might need modification.
             case v: Value => v.value
             case v: Map[_, _] => v.map{ case (k, v) => (k.toString, Value(v)) }
             // Adding mutable map classes
@@ -195,6 +197,33 @@ object Json
             else if(this.isString) this.asString
             else if(this.isArray || this.isMap) super.toString
             else this.asLong.toString
+        }
+
+        /**
+         * Method to get the Json.Value object given a path in x.y.z format. Only works for
+         * successive maps with keys as "x", "y", "z" etc.
+         * @param path
+         * @return
+         */
+        def get(path: String): Json.Value =
+        {
+            @tailrec
+            def getVal(map: Map[String, Value], parts: List[String]): Value =
+            {
+                if(parts.length == 1)
+                    map(parts(0))
+                else
+                    getVal(map(parts(0)).asMap, parts.splitAt(1)._2)
+                /*
+                // Not sure how to do below elegantly!!
+                parts match
+                {
+                    case h::t => getVal(map(h).asMap, t)
+                    case _ => map(parts(0))
+                }
+                */
+            }
+            getVal(this.asMap, path.split('.').toList)
         }
     }
 
@@ -363,4 +392,5 @@ object Json
         }
         Value(sta.head._2)
     }
+
 }
