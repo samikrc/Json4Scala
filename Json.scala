@@ -2,7 +2,7 @@
  * Single class JSON parser
  * Created by gaoyunxiang on 8/22/15.
  * Modified by samikrc
- * Updated 10-03-2020
+ * Updated 05-02-2020
  */
 
 import scala.annotation.tailrec
