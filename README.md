@@ -4,7 +4,9 @@ The implementation of Json Objects is very easy, benefits from the "Any" class o
 I was trying to implement the code as short as possible, so you can understand the detail of the code easily.
 For more detail, see "Json.scala".
 
-[samikrc] Added Exception for some of the reported errors for easier integration. Fixed a [bug][2].
+[samikrc] Added Exception for some of the reported errors for easier integration. Fixed a [bug][2]. Added a few other improvements.
+
+Note: This parser is not thread-safe. Be mindful of this when using from Spark.
 
 
 
