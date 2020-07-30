@@ -2,7 +2,7 @@
  * Single class JSON parser
  * Created by gaoyunxiang on 8/22/15.
  * Modified by samikrc
- * Updated 05-02-2020
+ * Updated 30-07-2020
  */
 
 import scala.annotation.tailrec
@@ -98,16 +98,20 @@ object Json
             case _: String => inputValue
             // Adding Float: up-converting to double
             case v: Float => v.toDouble
-            // Adding Byte: for the time being, just converting into String. Might need modification.
-            case v: Value => v.value
             case v: Map[_, _] => v.map{ case (k, v) => (k.toString, Value(v)) }
             // Adding mutable map classes
+            // Need separate entry for LinkedHashMap, otherwise we loose type.
+            case v: mutable.LinkedHashMap[_,_] => v.map{ case (k, v) => (k.toString, Value(v)) }
             case v: mutable.Map[_, _] => v.map{ case (k, v) => (k.toString, Value(v)) }
-            case v: Vector[_] => v.map(Value(_)).toArray
-            case v: List[_] => v.map(Value(_)).toArray
+            // Adding mutable and immutable collection classes
+            case v: mutable.Iterable[_] => v.map(Value(_)).toArray
+            case v: immutable.Iterable[_] => v.map(Value(_)).toArray
+            //case v: Vector[_] => v.map(Value(_)).toArray
+            //case v: List[_] => v.map(Value(_)).toArray
             case v: Array[_] => v.map(Value(_))
             case v: Iterator[_] => v.map(Value(_)).toArray
 
+            case v: Value => v.value
             case _ => throw new Exception("Unknown type")
         }
 
@@ -168,6 +172,24 @@ object Json
                     }
                     buffer.append(']')
                 case v: Map[_, _] =>
+                    buffer.append('{')
+                    var first = true
+                    v.foreach
+                    {
+                        case one =>
+                            if (!first)
+                            {
+                                buffer.append(',')
+                            }
+                            first = false
+                            buffer.append('"')
+                            buffer.append(one._1)
+                            buffer.append('"')
+                            buffer.append(':')
+                            one._2.asInstanceOf[Value].recWrite(buffer)
+                    }
+                    buffer.append('}')
+                case v: mutable.LinkedHashMap[_, _] =>
                     buffer.append('{')
                     var first = true
                     v.foreach
