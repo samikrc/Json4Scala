@@ -7,6 +7,7 @@
 
 import scala.annotation.tailrec
 import scala.collection.mutable
+import scala.collection.immutable
 
 object Json
 {
