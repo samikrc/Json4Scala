@@ -1,9 +1,9 @@
 /**
- * Single class JSON parser
- * Created by gaoyunxiang on 8/22/15.
- * Modified by samikrc
- * Updated 30-07-2020
- */
+  * Single class JSON parser
+  * Created by gaoyunxiang on 8/22/15.
+  * Modified by samikrc
+  * Updated 06-10-2020
+  */
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -13,16 +13,16 @@ object Json
 {
 
     /**
-     * Incomplete JSON
-     * @param message
-     */
+      * Incomplete JSON
+      * @param message
+      */
     case class IncompleteJSONException(val message: String) extends Exception(s"Parse error: the JSON string might be incomplete - $message")
 
     /**
-     * Unrecognized characters
-     * @param char
-     * @param pos
-     */
+      * Unrecognized characters
+      * @param char
+      * @param pos
+      */
     case class UnrecognizedCharException(val char: String, val pos: Int) extends Exception(s"Parse error: unrecognized character(s) '${char.substring(0, 6)}'... at position $pos - might be incomplete. Check for matching braces.")
 
     object Type extends Enumeration
@@ -31,9 +31,9 @@ object Json
     }
 
     /**
-     * Encapsulates a JSON structure from any of the supported data type.
-     * @param inputValue
-     */
+      * Encapsulates a JSON structure from any of the supported data type.
+      * @param inputValue
+      */
     class Value(inputValue: Any)
     {
 
@@ -73,9 +73,9 @@ object Json
         def apply(key: String): Value = value.asInstanceOf[Map[String, Value]](key)
 
         /**
-         * Method to write this object as JSON string.
-         * @return
-         */
+          * Method to write this object as JSON string.
+          * @return
+          */
         def write: String =
         {
             val buffer = new mutable.StringBuilder()
@@ -84,9 +84,9 @@ object Json
         }
 
         /**
-         * Method to write this object as JSON string, ending with newline.
-         * @return
-         */
+          * Method to write this object as JSON string, ending with newline.
+          * @return
+          */
         def writeln: String = s"${write}\n"
 
         private val value: Any = inputValue match
@@ -223,13 +223,52 @@ object Json
         }
 
         /**
-         * Method to get the Json.Value object given a path in x.y.z format. Only works for
-         * successive maps with keys as "x", "y", "z" etc.
+         * Method to check if a path in x.y.z format exists. Only works for
+          * successive maps with keys as "x", "y", "z" etc.
          * @param path
          * @return
          */
+        def has(path: String): Boolean =
+        {
+            // In this case, we need a try-catch block to ascertain path availability
+            try
+            {
+                traverseForFn[Boolean](path, (map: Map[String, Value], parts: List[String]) => map.contains(parts(0)))
+            }
+            catch
+            {
+                case ex: NoSuchElementException => false
+                case x: _ => throw x
+            }
+            /*
+            @tailrec
+            def hasPath(map: Map[String, Value], parts: List[String]): Boolean =
+            {
+                if(parts.length == 1)
+                    map.contains(parts(0))
+                else
+                {
+                    if(map.contains(parts(0)))
+                        hasPath(map(parts(0)).asMap, parts.splitAt(1)._2)
+                    else
+                        false
+                }
+            }
+            hasPath(this.asMap, path.split(".").toList)
+            */
+        }
+
+        /**
+          * Method to get the Json.Value object given a path in x.y.z format. Only works for
+          * successive maps with keys as "x", "y", "z" etc.
+          * @param path
+          * @return
+          */
         def get(path: String): Json.Value =
         {
+            traverseForFn[Json.Value](path, (map: Map[String, Value], parts: List[String]) => map(parts(0)))
+
+            /*
             @tailrec
             def getVal(map: Map[String, Value], parts: List[String]): Value =
             {
@@ -237,6 +276,28 @@ object Json
                     map(parts(0))
                 else
                     getVal(map(parts(0)).asMap, parts.splitAt(1)._2)
+            }
+            getVal(this.asMap, path.split('.').toList)
+            */
+        }
+
+        /**
+         * A recursive traversal method for a given path and a given function. Meant to be
+         * used as a higher order function (HOF) for traversal-based utility, e.g., get/has.
+         * @param path
+         * @param f
+         * @tparam A
+         * @return
+         */
+        private def traverseForFn[A](path: String, f: (Map[String, Value], List[String]) => A): A =
+        {
+            @tailrec
+            def traverse(map: Map[String, Value], parts: List[String]): A =
+            {
+                if(parts.length == 1)
+                    f(map, parts)
+                else
+                    traverse(map(parts(0)).asMap, parts.splitAt(1)._2)
                 /*
                 // Not sure how to do below elegantly!!
                 parts match
@@ -246,7 +307,7 @@ object Json
                 }
                 */
             }
-            getVal(this.asMap, path.split('.').toList)
+            traverse(this.asMap, path.split('.').toList)
         }
     }
 
